@@ -1,6 +1,6 @@
 
 
-public class oArrays {
+public class eArrays {
     public static void main(String[] args) {
         
         // array = used to store multiple values in a single variable

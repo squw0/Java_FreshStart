@@ -1,6 +1,6 @@
 import java.util.ArrayList;
 
-public class tArrayList {
+public class iArrayList {
 
 	public static void main(String[] args) {
 			

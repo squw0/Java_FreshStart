@@ -1,4 +1,4 @@
-public class mForLoop {
+public class cForLoop {
     public static void main(String[] args) {
         
         // for loop = executes a block of code a limited amount of times

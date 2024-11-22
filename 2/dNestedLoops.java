@@ -1,7 +1,7 @@
 
 import java.util.Scanner;
 
-public class nNestedLoops {
+public class dNestedLoops {
     public static void main(String[] args) {
         
         // nested loops = a loop inside of a loop

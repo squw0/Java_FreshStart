@@ -1,6 +1,6 @@
 import java.util.ArrayList;
 
-public class wForEachLoop {
+public class aForEachLoop {
     public static void main(String[] args) {
 			
 		// for-each = 	traversing technique to iterate through the elements in an array/collection

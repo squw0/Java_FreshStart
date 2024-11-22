@@ -1,5 +1,5 @@
 
-public class p2dArrays {
+public class f2dArrays {
     public static void main(String[] args) {
         
         // 2d array = an array of arrays
