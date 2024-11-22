@@ -1,6 +1,6 @@
 import java.util.Scanner;
 
-public class kLogicalOperators {
+public class aLogicalOperators {
     public static void main(String[] args) {
         
         // && = (and) - both conditions must be true

@@ -1,4 +1,4 @@
-public class zJavaMethods {
+public class bJavaMethods {
 
     //  method = a block of code that is executed whenever it is called upon
 

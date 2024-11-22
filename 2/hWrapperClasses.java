@@ -1,4 +1,4 @@
-public class sWrapperClasses {
+public class hWrapperClasses {
 
     public static void main(String[] args) {
      

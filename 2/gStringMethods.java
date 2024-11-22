@@ -1,4 +1,4 @@
-public class rStringMethods {
+public class gStringMethods {
     public static void main(String[] args) {
         
         // String = a reference data type that can store one or more characters
