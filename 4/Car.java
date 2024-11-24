@@ -7,4 +7,8 @@ public class Car extends Vehicle{
     Car(String name){
         this.name = name;
     }
+
+    void goo(){
+        System.out.println("The driver is driving the car");
+    }
 }
