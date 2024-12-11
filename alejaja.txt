@@ -1,0 +1,407 @@
+GRUPA 1
+zad 1 filtracja 
+
+pkg load image;
+clc;
+clear;
+
+I1 = imread('Obraz_01a.png');
+I2 = imread('Obraz_02a.png');
+I3 = imread('Obraz_03a.png');
+
+%%%
+
+gauss = fspecial('gaussian', [5 5], 2);
+I1uG = imfilter(I1, gauss);
+I2uG = imfilter(I2, gauss);
+I3uG = imfilter(I3, gauss);
+
+figure;
+subplot(1,3,1), imshow(I1uG), title("Obraz 1 gauss");
+subplot(1,3,2), imshow(I2uG), title("Obraz 2 gauss");
+subplot(1,3,3), imshow(I3uG), title("Obraz 3 gauss");
+
+%%%%
+
+laplace = fspecial('laplacian', 0.01);
+I1uL = imfilter(I1, laplace);
+I2uL = imfilter(I2, laplace);
+I3uL = imfilter(I3, laplace);
+
+figure;
+subplot(1,3,1), imshow(I1uL), title("Obraz 1 laplace");
+subplot(1,3,2), imshow(I2uL), title("Obraz 2 laplace");
+subplot(1,3,3), imshow(I3uL), title("Obraz 3 laplace");
+
+
+% zad 2: Histogram operations on images 3 and 4
+
+pkg load image;
+clc;
+clear;
+
+I1 = imread('Obraz_05a.png');
+I1gray = rgb2gray(I1);
+
+brighter = 50;
+I1bright = I1gray + brighter;
+
+
+I1adjusted = histeq(I1gray, 256);
+
+figure;
+subplot(1,3,1), imshow(I1), title("Obraz 5");
+subplot(1,3,2), imshow(I1bright), title("Obraz 5 jasniejszy");
+subplot(1,3,3), imshow(I1adjusted), title("Obraz 5 znormalizowany");
+
+
+% zad 3: Cut rhombus area from image 1
+[r, c, ~] = size(img1);
+mask = poly2mask([c/4, 3*c/4, c/2, c/4], [r/4, r/4, 3*r/4, 3*r/4], r, c);
+img1(mask) = 255; % Replace with white
+
+imwrite(img1, 'rhombus_cut_image1.png');
+
+$$$$
+
+pkg load image;
+
+image_target = imread('target_image.png');
+
+mask_rhombus = imread('rhombus_mask.png');
+
+binary_mask_rhombus = mask_rhombus(:, :, 1) > 200;
+
+binary_mask_rhombus = imresize(binary_mask_rhombus, [size(image_target, 1), size(image_target, 2)]);
+
+output_image_rhombus = image_target;
+for i = 1:size(image_target, 3)
+    channel = image_target(:, :, i);
+    channel(binary_mask_rhombus) = 255; % Wypełnienie białym kolorem
+    output_image_rhombus(:, :, i) = channel;
+end
+
+imwrite(output_image_rhombus, 'cutout_rhombus_image.png');
+
+
+% Task 4: Circular area with fragment of image 4
+
+[r, c, ~] = size(img4);
+[x, y] = meshgrid(1:c, 1:r);
+center = [c/2, r/2];
+radius = min(r, c) / 4;
+circle_mask = ((x - center(1)).^2 + (y - center(2)).^2) <= radius^2;
+
+circular_img = zeros(size(img4));
+for i = 1:3 % For each color channel
+    channel = img4(:, :, i);
+    circular_img(:, :, i) = uint8(circle_mask) .* channel;
+end
+
+imwrite(circular_img, 'circular_fragment_image4.png');
+
+
+$$$$$
+
+pkg load image; 
+
+[i1, map1] = imread('target_image.png'); 
+[maska, map2] = imread('circle_mask.png'); 
+
+maska = uint8(maska); 
+maska = maska * 255;  
+
+maska_inverse = ~maska; 
+maska_inverse = uint8(maska_inverse) * 255;
+
+maska_moded = bitand(i1, maska); 
+maska_moded = bitor(maska_moded, maska_inverse);
+
+
+figure; imshow(maska_moded);
+imwrite(maska_moded, 'circular_fragment_white_background.png');
+
+
+% Task 5: Arithmetic operations on image 3
+bright_img3 = img3 + 50; % Increase brightness
+normalized_img3 = uint8(255 * mat2gray(bright_img3)); % Normalize intensities
+
+imwrite(normalized_img3, 'arith_image3.png');
+
+
+GRUPA 3
+
+pkg load image; % Load the image processing package
+
+% Load images
+img1 = imread('image1.png');
+img2 = imread('image2.png');
+img3 = imread('image3.png');
+img4 = imread('image4.png');
+
+% Task 1: Histogram operations on grayscale images 3 and 4
+if size(img3, 3) == 3
+    img3_gray = rgb2gray(img3);
+else
+    img3_gray = img3;
+end
+
+if size(img4, 3) == 3
+    img4_gray = rgb2gray(img4);
+else
+    img4_gray = img4;
+end
+
+hist_eq_img3 = histeq(img3_gray); % Histogram equalization
+hist_eq_img4 = histeq(img4_gray);
+
+imwrite(hist_eq_img3, 'group3_hist_eq_image3.png');
+imwrite(hist_eq_img4, 'group3_hist_eq_image4.png');
+
+% zad 2: Cut out triangular area from image 1 and make it white
+
+pkg load image;
+
+image_target = imread('target_image.png');
+
+mask_triangle = imread('triangle_mask.png');
+
+binary_mask_triangle = mask_triangle(:, :, 1) > 200;
+
+binary_mask_triangle = imresize(binary_mask_triangle, [size(image_target, 1), size(image_target, 2)]);
+
+output_image_triangle = image_target;
+for i = 1:size(image_target, 3)
+    channel = image_target(:, :, i);
+    channel(binary_mask_triangle) = 255; % Wypełnienie białym kolorem
+    output_image_triangle(:, :, i) = channel;
+end
+
+imwrite(output_image_triangle, 'cutout_triangle_image.png');
+
+
+% Task 3: Filter images 1 and 2
+
+pkg load image;
+clc;
+clear;
+
+I1 = imread('Obraz_01a.png');
+I2 = imread('Obraz_02a.png');
+I3 = imread('Obraz_03a.png');
+
+%%%
+
+gauss = fspecial('gaussian', [5 5], 2);
+I1uG = imfilter(I1, gauss);
+I2uG = imfilter(I2, gauss);
+I3uG = imfilter(I3, gauss);
+
+figure;
+subplot(1,3,1), imshow(I1uG), title("Obraz 1 gauss");
+subplot(1,3,2), imshow(I2uG), title("Obraz 2 gauss");
+subplot(1,3,3), imshow(I3uG), title("Obraz 3 gauss");
+
+%%%%
+
+laplace = fspecial('laplacian', 0.01);
+I1uL = imfilter(I1, laplace);
+I2uL = imfilter(I2, laplace);
+I3uL = imfilter(I3, laplace);
+
+figure;
+subplot(1,3,1), imshow(I1uL), title("Obraz 1 laplace");
+subplot(1,3,2), imshow(I2uL), title("Obraz 2 laplace");
+subplot(1,3,3), imshow(I3uL), title("Obraz 3 laplace");
+
+
+% Task 4: Circular area with a fragment of image 4, rest white
+
+pkg load image; % Ładowanie pakietu do przetwarzania obrazów
+
+% Wczytaj obraz i maskę
+[i1, map1] = imread('target_image.png'); % Obraz docelowy
+[maska, map2] = imread('circle_mask.png'); % Maska koła
+
+% Konwersja maski na uint8 i skalowanie
+maska = uint8(maska); % Konwersja maski na uint8
+maska = maska * 255;  % Skalowanie do zakresu 0–255 (jeśli maska jest binarna)
+
+% Wygenerowanie obrazu z fragmentem wewnątrz koła i tłem czarnym
+maska_moded = bitand(i1, maska); % Połączenie obrazu i maski przy użyciu operacji AND
+
+% Wyświetlenie i zapisanie obrazu
+figure; imshow(maska_moded);
+imwrite(maska_moded, 'circular_fragment_black_background.png');
+
+
+% Task 5: Improve quality of image 3 using arithmetic operations
+bright_img3 = img3_gray + 50; % Increase brightness
+normalized_img3 = uint8(255 * mat2gray(bright_img3)); % Normalize intensities
+
+imwrite(normalized_img3, 'group3_arith_image3.png');
+
+
+
+
+
+
+
+
+#####################################################################
+
+
+
+ZAD 1 
+
+Popraw jakość obrazów 1, 2 i 3 używając operacji filtracji.
+
+%{
+pkg load image;
+clc;
+clear;
+
+I1 = imread('Obraz_01a.png');
+I2 = imread('Obraz_02a.png');
+I3 = imread('Obraz_03a.png');
+
+figure;
+subplot(1,3,1), imshow(I1), title("Obraz 1 oryginał");
+subplot(1,3,2), imshow(I2), title("Obraz 2 oryginał");
+subplot(1,3,3), imshow(I3), title("Obraz 3 oryginał");
+
+%%%%
+
+gauss = fspecial('gaussian', [5 5], 2);
+I1uG = imfilter(I1, gauss);
+I2uG = imfilter(I2, gauss);
+I3uG = imfilter(I3, gauss);
+
+figure;
+subplot(1,3,1), imshow(I1uG), title("Obraz 1 gauss");
+subplot(1,3,2), imshow(I2uG), title("Obraz 2 gauss");
+subplot(1,3,3), imshow(I3uG), title("Obraz 3 gauss");
+
+%%%%
+
+laplace = fspecial('laplacian', 0.01);
+I1uL = imfilter(I1, laplace);
+I2uL = imfilter(I2, laplace);
+I3uL = imfilter(I3, laplace);
+
+figure;
+subplot(1,3,1), imshow(I1uL), title("Obraz 1 laplace");
+subplot(1,3,2), imshow(I2uL), title("Obraz 2 laplace");
+subplot(1,3,3), imshow(I3uL), title("Obraz 3 laplace");
+
+
+%%%%
+
+I1uSP = medfilt2(I1);
+I2uSP = medfilt2(I2);
+I3uSP = medfilt2(I3);
+%I3uSP = medfilt2(I3, [3 3]);
+
+figure;
+subplot(1,3,1), imshow(I1uSP), title("Obraz 1 s&p");
+subplot(1,3,2), imshow(I2uSP), title("Obraz 2 s&p");
+subplot(1,3,3), imshow(I3uSP), title("Obraz 3 s&p");
+%}
+
+
+
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@22
+
+ZAD 2 
+
+Popraw kontrast na obrazie 4, zadbaj o jak najlepszą jakość obrazu wynikowego.
+
+
+
+pkg load image;
+clc;
+clear;
+
+I1 = imread('Obraz_04a.jpg');
+I1gray = rgb2gray(I1);
+
+I1contrast = imadjust(I1gray, stretchlim(I1gray), [0 1]);
+I1h = histeq(I1gray);
+
+I1contrastt = imadjust(I1);
+
+figure;
+subplot(1,3,1), imshow(I1), title("Obraz 4");
+subplot(1,3,2), imshow(I1contrastt), title("Obraz 4 kontrastt");
+subplot(1,3,3), imshow(I1contrast), title("Obraz 4 kontrast");
+
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+ZAD 3
+
+Dopasuj jasność obrazu 5 używając operacji na histogramie poziomów szarości lub/i operacji arytmetycznych.
+
+
+
+pkg load image;
+clc;
+clear;
+
+I1 = imread('Obraz_05a.png');
+I1gray = rgb2gray(I1);
+
+brighter = 50;
+I1bright = I1gray + brighter;
+
+
+I1adjusted = histeq(I1gray, 256);
+
+figure;
+subplot(1,3,1), imshow(I1), title("Obraz 5");
+subplot(1,3,2), imshow(I1bright), title("Obraz 5 jasniejszy");
+subplot(1,3,3), imshow(I1adjusted), title("Obraz 5 znormalizowany");
+
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+ZAD 4
+
+Popraw jakość obrazu 6, wykorzystaj funkcję Matlaba imadjust
+
+
+%{
+pkg load image;
+clc;
+clear;
+
+I1 = imread('Obraz_06a.jpg');
+I1gray = rgb2gray(I1);
+
+I1adjusted = imadjust(I1gray, stretchlim(I1gray),[0 1]);
+
+figure;
+imshow(I1adjusted);
+title("Obraz 6 imadjust");
+
+%}
+
+pkg load image;
+
+I1 = imread('Obraz_06a.jpg');
+
+I1adj = imadjust(I1);
+
+figure;
+subplot(1,2,1), imshow(I1), title('Obraz 6');
+subplot(1,2,2), imshow(I1adj), title('Obraz 6 adjusted');
+
+
+
+
+
+
+
+
+
