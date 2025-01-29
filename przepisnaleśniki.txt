@@ -1,0 +1,297 @@
+zagadnienia:
+ Analiza cech na obrazie, 
+otwieranie plików, 
+filtrowanie do poprawy jakości,
+ segmentacja - progowanie w szarości,  
+poprawa jakości obiektów aby krawędzie nie były poszczepione, 
+analiza cech - liczenie cech pole powierzchni obwód położenie 
+Wyznacz obiekt z największym polem powierzchni, 
+ile obiektów się znajduje
+
+
+zapiswanie - imwrite(ObrazDoZapisu, 'nazwa_pliku.jpg');
+
+
+
+LAB8 - Wykryj krawędzie na załączonych obrazach. Wypróbuj różne detektory krawędzi (funkcja edge).
+
+pkg load image; clc; clear;
+I1 = imread('motyl.jpg');
+if size(I1, 3) == 3
+  I1gray = rgb2gray(I1);
+end
+I1gray = edge(I1gray, "Canny");
+I2gray = edge(I2gray, "Sobel");
+I3gray = edge(I3gray, "Lindeberg");
+I4gray = edge(I4gray, "Kirsch");
+figure;
+subplot(1,2,1); imshow(I1), title("Oryginał");
+subplot(1,2,2); imshow(I1gray), title("Edge Canny");
+
+
+
+LAB9 - Segmentacja obrazów - Wartość progowa
+
+%%%% wartość progowa
+%dwuargumentowa
+function binary_image = progowanieBW(image, threshold)
+    if size(image,3) == 3
+        image = rgb2gray(image);
+    end
+    binary_image = image > threshold;
+end
+pkg load image
+image = imread();
+figure(2);
+imhist(image);
+title('Histogram obrazu');
+disp('klikjnij histogram aby wybrać wartość progową');
+[x, ~] = ginput(1);
+threshold = round(x);
+disp(['Wybrana wartość progowa: ', num2str(threshold)]);
+binary_image = progowanieBW(image, threshold);
+figure(3);
+imshow(binary_image);
+title(['Obraz binarny (Próg = ', num2str(threshold), ')']);
+
+
+%%%% trójargumentowa
+function binary_image = progowanie2BW(image, t1, t2)
+  if size(image,3) == 3
+    image = rgb2gray(image);
+  end
+  binary_image = (image >= t1) & (image <= t2);
+end
+pkg load image
+image = imread();
+figure(2);
+imhist(image);
+title('Histogram obrazu');
+disp('Kliknij dwukrotnie na histogramie, aby wybrać dwie wartości progowe...');
+[x, ~] = ginput(2);
+t1 = round(min(x));
+t2 = round(max(x));
+disp(['Wybrane progi: t1 = ', num2str(t1), ', t2 = ', num2str(t2)]);
+binary_image = progowanie2BW(image, t1, t2);
+figure(3);
+imshow(binary_image);
+title(['Obraz binarny (Przedział: [', num2str(t1), ', ', num2str(t2), '])']);
+
+
+%%%% czteroargumentowa
+function result_image = progowanie2Gray(image, t1, t2, color)
+  if size(image,3) == 3
+    image = rgb2gray(image);
+  end
+  result_image = image;
+  result_image(image < t1 | image > t2) = color;
+end
+pkg load image
+image = imread();
+figure(2);
+imhist(image);
+title('Histogram obrazu');
+disp('Kliknij dwukrotnie na histogramie, aby wybrać dwie wartości progowe...');
+[x, ~] = ginput(2);
+t1 = round(min(x));
+t2 = round(max(x));
+disp(['Wybrane progi: t1 = ', num2str(t1), ', t2 = ', num2str(t2)]);
+black_or_white = input('Wprowadź wartość koloru (0 dla czarnego, 255 dla białego): ');
+if black_or_white ~= 0 && black_or_white ~= 255
+    error('Nieprawidłowa wartość. Podaj 0 lub 255.');
+end
+result_image = progowanie2Gray(image, t1, t2, black_or_white);
+figure(3);
+imshow(result_image);
+title(['Obraz po progowaniu (t1 = ', num2str(t1), ', t2 = ', num2str(t2), ', Kolor = ', num2str(black_or_white), ')']);
+
+
+
+lab10 - morfologia matematyczna - wypełnianie, wygładzanie / rozdzielanie / usuwanie stykających brzegu
+
+
+% wypełnianie i wygładzanie
+
+pkg load image;
+image_path = 'images_01.jpg';
+I = imread(image_path);
+if size(I, 3) == 3
+    I = rgb2gray(I);
+end
+threshold = graythresh(I);
+BW = im2bw(I, threshold);
+BW_inverted = ~BW;
+BW_filled = imfill(BW_inverted, 'holes');
+BW_final = ~BW_filled;
+figure;
+subplot(1, 3, 1); imshow(BW); title('Obraz Binarny');
+subplot(1, 3, 2); imshow(BW_filled); title('Dziury Wypełnione');
+subplot(1, 3, 3); imshow(BW_final); title('Obiekty Wypełnione na Czarny');
+
+
+% rozdzielanie stykających obiektów
+
+clc; clear; close all;
+pkg load image;
+image_path = 'images_04.jpg';
+I = imread(image_path);
+if size(I,3) == 3
+    I = rgb2gray(I);
+end
+threshold = graythresh(I);
+BW = im2bw(I, threshold);
+BW = ~BW;
+se = ones(3,3);
+BW_cleaned = imerode(BW, se);
+BW_cleaned = imdilate(BW_cleaned, se);
+D = -bwdist(~BW_cleaned);
+mask = imextendedmin(D, 2);
+D2 = imimposemin(D, mask);
+L = watershed(D2);
+BW_final = BW_cleaned;
+BW_final(L == 0) = 0;
+figure;
+subplot(2,3,1); imshow(I); title('Oryginalny Obraz');
+subplot(2,3,2); imshow(BW); title('Obraz Binarny');
+subplot(2,3,3); imshow(BW_cleaned); title('Po Usunięciu Szumu');
+subplot(2,3,4); imshow(D, []); title('Transformacja Odległościowa');
+subplot(2,3,5); imshow(L, []); title('Segmentacja Watershed');
+subplot(2,3,6); imshow(BW_final); title('Finalne Rozdzielone Obiekty');
+
+
+% usuwanie stykających brzegu
+
+pkg load image;
+image_path = 'images_01.jpg';
+I = imread(image_path);
+if size(I, 3) == 3
+    I = rgb2gray(I);
+end
+threshold = graythresh(I);
+BW = im2bw(I, threshold);
+BW = ~BW;
+[L, num] = bwlabel(BW, 8);
+for i = 1:num
+    [rows, cols] = find(L == i);
+    if any(rows == 1) || any(rows == size(BW, 1)) || any(cols == 1) || any(cols == size(BW, 2))
+        L(L == i) = 0;
+    end
+end
+BW_cleaned = L > 0;
+BW_final = ~BW_cleaned;
+figure;
+subplot(1, 3, 1); imshow(BW); title('Oryginalny Obraz Binarny');
+subplot(1, 3, 2); imshow(L > 0); title('Po Usunięciu Obiektów na Brzegach');
+subplot(1, 3, 3); imshow(BW_final); title('Finalny Obraz');
+
+
+
+lab11 - Wykrywanie i analiza cech
+
+
+% wyznacz i zaznacz najmniejszy  liczba obiektów mniejszych
+
+close all; clear; clc; pkg load image;
+I = imread('rice.png');
+if size(I, 3) == 3
+    I = rgb2gray(I);
+end
+figure; imhist(I); title('Histogram obrazu');
+disp('Zwiększamy poziom progowania, aby wyodrębnić ryż');
+disp('Wciśnij Enter, aby kontynuować...');
+pause;
+threshold = 120;
+BW = I > threshold;
+BW = imfill(BW, 'holes');
+BW = imerode(BW, ones(3));
+BW = imdilate(BW, ones(3));
+[L, num] = bwlabel(BW);
+s = regionprops(L, 'Area', 'BoundingBox');
+areas = [s.Area];
+[minArea, minIndex] = min(areas);
+meanArea = mean(areas);
+num_smaller_than_avg = sum(areas < meanArea);
+disp(['Liczba obiektów: ', num2str(num)]);
+disp(['Średnia powierzchnia obiektów: ', num2str(meanArea)]);
+disp(['Liczba obiektów mniejszych od średniej: ', num2str(num_smaller_than_avg)]);
+disp(['Najmniejszy obiekt ma powierzchnię: ', num2str(minArea)]);
+figure; imshow(BW); title('Obiekty na obrazie');
+hold on;
+rectangle('Position', s(minIndex).BoundingBox, 'EdgeColor', 'r', 'LineWidth', 2);
+hold off;
+
+
+
+% krwinki liczenie tylko całe
+
+obrazie
+close all; clear; clc; pkg load image;
+I = imread('krwinki.jpg');
+if size(I, 3) == 3
+    I = rgb2gray(I);
+end
+I = imadjust(I, stretchlim(I), []);
+threshold = 110;
+BW = I < threshold;
+BW = imfill(BW, 'holes');
+[L, num] = bwlabel(BW);
+stats = regionprops(L, 'Area', 'Perimeter', 'MajorAxisLength', 'MinorAxisLength', 'BoundingBox');
+areas = [stats.Area];
+perimeters = [stats.Perimeter];
+majorAxis = [stats.MajorAxisLength];
+minorAxis = [stats.MinorAxisLength];
+meanArea = mean(areas);
+meanPerimeter = mean(perimeters);
+meanMajorAxis = mean(majorAxis);
+meanMinorAxis = mean(minorAxis);
+validObjects = (areas > meanArea) & (perimeters > meanPerimeter) & ...
+               (majorAxis > meanMajorAxis) & (minorAxis > meanMinorAxis);
+numValidCells = sum(validObjects);
+disp(['Liczba wszystkich obiektów: ', num2str(num)]);
+disp(['Liczba pełnych czerwonych krwinek: ', num2str(numValidCells)]);
+figure; imshow(BW); title('Krwinki na obrazie');
+hold on;
+for i = 1:length(stats)
+    if validObjects(i)
+        rectangle('Position', stats(i).BoundingBox, 'EdgeColor', 'g', 'LineWidth', 2);
+    end
+end
+hold off;
+
+
+
+%liczenie poziomych bakterii a potem je na czerwono otoczyć
+
+close all;
+clear;
+clc;
+pkg load image;
+I = imread('bakterie.jpg');
+if size(I, 3) < 3
+    disp('Obraz nie jest w kolorze RGB!');
+    return;
+end
+R = I(:, :, 1);
+G = I(:, :, 2);
+B = I(:, :, 3);
+mask = (G > R) & (G > B);
+BW = ~mask;
+BW = imfill(BW, 'holes');
+[L, num] = bwlabel(BW);
+stats = regionprops(L, 'Area', 'BoundingBox', 'MajorAxisLength', 'MinorAxisLength');
+horizontalBacteria = [];
+
+for i = 1:length(stats)
+    if stats(i).MajorAxisLength / stats(i).MinorAxisLength > 2
+        horizontalBacteria = [horizontalBacteria, i];
+    end
+end
+numHorizontal = length(horizontalBacteria);
+disp(['Liczba wszystkich bakterii: ', num2str(num)]);
+disp(['Liczba poziomych bakterii: ', num2str(numHorizontal)]);
+figure; imshow(BW); title('Poziome bakterie na obrazie');
+hold on;
+for i = horizontalBacteria
+    rectangle('Position', stats(i).BoundingBox, 'EdgeColor', 'r', 'LineWidth', 2);
+end
+hold off;
