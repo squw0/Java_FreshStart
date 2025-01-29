@@ -9,6 +9,103 @@ Wyznacz obiekt z największym polem powierzchni,
 ile obiektów się znajduje
 
 
+
+
+
+
+
+close all;
+clear;
+clc;
+pkg load image;
+I = imread('rice.png');
+if size(I, 3) == 3
+    I = rgb2gray(I);
+end
+figure; imhist(I); title('Histogram obrazu');
+disp('Wciśnij Enter, aby kontynuować...');
+pause;
+
+% progowanie Otsu
+threshold = graythresh(I);
+BW = im2bw(I, threshold);
+
+% Wypełnienie "dziur" i wygładzenie brzegów
+BW = imfill(BW, 'holes');
+BW = imopen(BW, ones(3)); % to wygladza krawedzie
+
+% Etykietowanie obiektów
+[L, num] = bwlabel(BW);
+stats = regionprops(L, 'Area', 'Perimeter', 'Centroid', 'BoundingBox');
+
+% Pobranie wartości metryk dla wszystkich obiektów
+areas = [stats.Area];
+perimeters = [stats.Perimeter];
+
+% Znalezienie największego i najmniejszego obiektu
+[maxArea, maxIndex] = max(areas);
+[minArea, minIndex] = min(areas);
+
+% Obliczenie średniego obwodu
+meanPerimeter = mean(perimeters);
+
+% Liczenie obiektów z obwodem większym niż średni
+numLargePerimeter = sum(perimeters > meanPerimeter);
+
+% Wyznaczenie środka ciężkości największego obiektu
+centroidMax = stats(maxIndex).Centroid;
+
+% Obliczenie procentowego zajmowanego miejsca przez obiekty
+totalArea = size(I, 1) * size(I, 2);
+occupiedPercentage = (sum(areas) / totalArea) * 100;
+
+% Wykrywanie obiektów stykających się z brzegiem obrazu
+borderObjects = [];
+for i = 1:num
+    [rows, cols] = find(L == i);
+    if any(rows == 1) || any(rows == size(L, 1)) || any(cols == 1) || any(cols == size(L, 2))
+        borderObjects = [borderObjects, i];
+    end
+end
+
+% Usunięcie obiektów stykających się z brzegiem
+for i = borderObjects
+    L(L == i) = 0;
+end
+
+BW_cleaned = L > 0;
+
+% Wyświetlenie wyników
+disp(['Liczba wszystkich obiektów: ', num2str(num)]);
+disp(['Liczba obiektów z obwodem większym niż średni: ', num2str(numLargePerimeter)]);
+disp(['Największy obiekt ma powierzchnię: ', num2str(maxArea)]);
+disp(['Najmniejszy obiekt ma powierzchnię: ', num2str(minArea)]);
+disp(['Środek ciężkości największego obiektu: x = ', num2str(centroidMax(1)), ', y = ', num2str(centroidMax(2))]);
+disp(['Procent zajętej powierzchni przez obiekty: ', num2str(occupiedPercentage), '%']);
+disp(['Etykiety obiektów stykających się z brzegiem: ', num2str(borderObjects)]);
+
+% Wizualizacja wyników
+figure;
+subplot(1, 3, 1); imshow(BW); title('Segmentacja obiektów');
+subplot(1, 3, 2); imshow(L, []); title('Etykietowane obiekty');
+subplot(1, 3, 3); imshow(BW_cleaned); title('Po usunięciu obiektów z brzegów');
+
+% Oznaczenie środka ciężkości największego obiektu
+hold on;
+plot(centroidMax(1), centroidMax(2), 'ro', 'MarkerSize', 10, 'LineWidth', 2);
+hold off;
+
+
+
+
+
+
+
+
+
+
+
+
 zapiswanie - imwrite(ObrazDoZapisu, 'nazwa_pliku.jpg');
 
 
