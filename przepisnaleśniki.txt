@@ -392,3 +392,90 @@ for i = horizontalBacteria
     rectangle('Position', stats(i).BoundingBox, 'EdgeColor', 'r', 'LineWidth', 2);
 end
 hold off;
+
+
+
+
+
+
+grupa 2 
+
+close all;
+clear;
+clc;
+pkg load image;
+
+% Wczytanie obrazu
+I = imread('obraz.jpg'); % <- Zmień nazwę pliku na rzeczywistą
+
+% Jeśli obraz jest kolorowy, konwertujemy do skali szarości
+if size(I, 3) == 3
+    I = rgb2gray(I);
+end
+
+% Wyświetlenie histogramu poziomów szarości
+figure; imhist(I); title('Histogram obrazu');
+disp('Wciśnij Enter, aby kontynuować...');
+pause;
+
+% Segmentacja – metoda Otsu do binaryzacji
+threshold = graythresh(I);
+BW = im2bw(I, threshold);
+
+% Wypełnienie dziur i wygładzenie obiektów
+BW = imfill(BW, 'holes');
+BW = imopen(BW, ones(3)); % Wygładzanie krawędzi
+
+% Etykietowanie obiektów
+[L, num] = bwlabel(BW);
+stats = regionprops(L, 'Area', 'Perimeter', 'Centroid', 'BoundingBox');
+
+% Pobranie metryk dla wszystkich obiektów
+areas = [stats.Area];
+perimeters = [stats.Perimeter];
+
+% Określenie liczby wszystkich obiektów
+disp(['Liczba obiektów na obrazie: ', num2str(num)]);
+
+% Obliczenie średniego obwodu
+meanPerimeter = mean(perimeters);
+
+% Liczenie obiektów, które mają obwód większy niż średni
+numLargePerimeter = sum(perimeters > meanPerimeter);
+disp(['Liczba obiektów z obwodem większym niż średni: ', num2str(numLargePerimeter)]);
+
+% Znalezienie najmniejszego obiektu
+[minArea, minIndex] = min(areas);
+centroidMin = stats(minIndex).Centroid;
+
+disp(['Środek ciężkości najmniejszego obiektu: x = ', num2str(centroidMin(1)), ', y = ', num2str(centroidMin(2))]);
+
+% Wykrywanie obiektów stykających się z brzegiem obrazu
+borderObjects = [];
+for i = 1:num
+    [rows, cols] = find(L == i);
+    if any(rows == 1) || any(rows == size(L, 1)) || any(cols == 1) || any(cols == size(L, 2))
+        borderObjects = [borderObjects, i];
+    end
+end
+
+disp(['Obiekty stykające się z brzegiem: ', num2str(borderObjects)]);
+
+% Usunięcie obiektów stykających się z brzegiem
+for i = borderObjects
+    L(L == i) = 0;
+end
+
+BW_cleaned = L > 0;
+
+% Wizualizacja wyników
+figure;
+subplot(1, 3, 1); imshow(BW); title('Segmentacja obiektów');
+subplot(1, 3, 2); imshow(L, []); title('Etykietowane obiekty');
+subplot(1, 3, 3); imshow(BW_cleaned); title('Po usunięciu obiektów z brzegów');
+
+% Oznaczenie środka ciężkości najmniejszego obiektu
+hold on;
+plot(centroidMin(1), centroidMin(2), 'ro', 'MarkerSize', 10, 'LineWidth', 2);
+hold off;
+
